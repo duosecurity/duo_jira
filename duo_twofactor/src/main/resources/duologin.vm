@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Duo Authentication</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  </head>
+
+  <body style="text-align: center;">
+    <h1>Duo Authentication</h1>
+
+     <div>
+       <script type="text/javascript" src="/download/resources/com.duosecurity.jira.plugins.duo-twofactor:resources/Duo-Web-v1.bundled.js"></script>
+       <script>
+         Duo.init({
+           'host': "$duoHost",
+           'sig_request': "$sigRequest",
+           'post_action': "$actionUrl"
+         });
+       </script>
+       <iframe height="500" width="620" id="duo_iframe" frameborder="0"></iframe>
+     </div>
+
+  </body>
+</html>
