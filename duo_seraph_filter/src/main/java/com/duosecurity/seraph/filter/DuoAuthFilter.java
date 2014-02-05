@@ -36,8 +36,10 @@ public class DuoAuthFilter implements javax.servlet.Filter {
   private String akey;
   private String host;
   private String loginUrl = "/plugins/servlet/duologin";
-  private String[] unprotectedDirs =
-      { "/download/resources/com.duosecurity.jira.plugins.duo-twofactor:resources/" };
+  private String[] unprotectedDirs = {
+      "/download/resources/com.duosecurity.jira.plugins.duo-twofactor:resources/",
+      "/rest/gadget/1.0/login"
+  };
 
   /**
    * Return true if url should not be protected by Duo auth, even if we have

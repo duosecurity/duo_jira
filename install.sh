@@ -69,9 +69,9 @@ if [ $? -ne 0 ]; then
 fi
 
 # install the seraph filter jar
-cp etc/duo-filter-1.2-SNAPSHOT.jar $JIRA/atlassian-jira/WEB-INF/lib
+cp etc/duo-filter-1.3-SNAPSHOT.jar $JIRA/atlassian-jira/WEB-INF/lib
 if [ $? -ne 0 ]; then
-    echo 'Could not copy duo-filter-1.2-SNAPSHOT.jar, please contact support@duosecurity.com'
+    echo 'Could not copy duo-filter-1.3-SNAPSHOT.jar, please contact support@duosecurity.com'
     echo 'exiting'
     exit 1
 fi
@@ -101,10 +101,6 @@ echo "        </init-param>"
 echo "        <init-param>"
 echo "            <param-name>host</param-name>"
 echo "            <param-value>$HOST</param-value>"
-echo "        </init-param>"
-echo "        <init-param>"
-echo "            <param-name>unprotected.dirs</param-name>"
-echo "            <param-value>/download/resources/com.duosecurity.jira.plugins.duo-twofactor:resources/ /rest/gadget/1.0/login</param-value>"
 echo "        </init-param>"
 echo "    </filter>"
 echo "    <filter-mapping>"
