@@ -9,7 +9,7 @@
     <h1>Duo Authentication</h1>
 
      <div>
-       <script type="text/javascript" src="/download/resources/com.duosecurity.jira.plugins.duo-twofactor:resources/Duo-Web-v1.bundled.js"></script>
+       <script type="text/javascript" src="$contextPath/download/resources/com.duosecurity.jira.plugins.duo-twofactor:resources/Duo-Web-v1.bundled.js"></script>
        <script>
          Duo.init({
            'host': "$duoHost",

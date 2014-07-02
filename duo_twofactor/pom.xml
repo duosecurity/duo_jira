@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.duosecurity.jira.plugins</groupId>
   <artifactId>duo-twofactor</artifactId>
-  <version>1.3-SNAPSHOT</version>
+  <version>1.3.1-SNAPSHOT</version>
 
   <organization>
     <name>Duo Security</name>
@@ -60,6 +60,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven.compiler.plugin.version}</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
@@ -69,8 +70,9 @@
   </build>
 
   <properties>
+    <maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
     <jira.version>6.1.5</jira.version>
-    <amps.version>4.2.10</amps.version>
+    <amps.version>5.0.3</amps.version>
   </properties>
 
 </project>

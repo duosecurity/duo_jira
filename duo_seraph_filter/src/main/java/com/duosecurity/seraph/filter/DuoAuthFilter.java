@@ -15,7 +15,6 @@ import org.apache.log4j.Category;
 @SuppressWarnings("UnusedDeclaration")
 public class DuoAuthFilter implements javax.servlet.Filter {
   private static final Category log = Category.getInstance(DuoAuthFilter.class);
-  private FilterConfig filterConfig;
 
   public static final String OS_AUTHSTATUS_KEY = "os_authstatus";
 
@@ -47,10 +46,10 @@ public class DuoAuthFilter implements javax.servlet.Filter {
    */
   private boolean isUnprotectedPage(String url) {
     // Is this url used for Duo auth?
-    if (url.equals(this.loginUrl)) {
+    if (url.equals(loginUrl)) {
       return true;
     }
-    for (String dir : this.unprotectedDirs) {
+    for (String dir : unprotectedDirs) {
       if (url.startsWith(dir)) {
         return true;
       }
@@ -60,13 +59,13 @@ public class DuoAuthFilter implements javax.servlet.Filter {
     // the user from here to the Duo auth, because there could be
     // credentials in the parameters that we'd want to take out of the URL
     // we redirect back to.
-    if (url.equals(this.mobileLoginUrl)) {
+    if (url.equals(mobileLoginUrl)) {
       return true;
     }
     return false;
   }
 
-  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+  @Override public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws java.io.IOException, javax.servlet.ServletException {
     HttpServletRequest httpServletRequest = (HttpServletRequest) request;
     HttpServletResponse httpServletResponse = (HttpServletResponse) response;
@@ -75,7 +74,9 @@ public class DuoAuthFilter implements javax.servlet.Filter {
     HttpSession session = httpServletRequest.getSession();
     Principal principal = httpServletRequest.getUserPrincipal();
 
-    if (!isUnprotectedPage(httpServletRequest.getRequestURI())) {
+    String contextPath = ((HttpServletRequest) request).getContextPath();
+
+    if (!isUnprotectedPage(httpServletRequest.getRequestURI().replaceFirst(contextPath, ""))) {
       if (principal != null) {
         // User has logged in locally, has there been a Duo auth?
         if (session.getAttribute(DUO_AUTH_SUCCESS_KEY) == null) {
@@ -101,16 +102,16 @@ public class DuoAuthFilter implements javax.servlet.Filter {
       // progress; this is what Seraph's SecurityFilter does.
       if (!httpServletResponse.isCommitted()) {
         String sigRequest = DuoWeb.signRequest(ikey, skey, akey, principal.getName());
-        final String originalURL =
-            httpServletRequest.getServletPath() + (httpServletRequest.getPathInfo() == null ? ""
-                : httpServletRequest.getPathInfo()) + (httpServletRequest.getQueryString() == null
-                ? "" : "?" + httpServletRequest.getQueryString());
-        String qs = new String();
-        String redirectUrl = new String();
+        final String originalURL = contextPath + httpServletRequest.getServletPath()
+            + (httpServletRequest.getPathInfo() == null ? "" : httpServletRequest.getPathInfo())
+            + (httpServletRequest.getQueryString() == null ? ""
+            : "?" + httpServletRequest.getQueryString());
+        String qs;
+        String redirectUrl;
         qs = DUO_REQUEST_KEY + "=" + sigRequest;
         qs = qs + "&" + DUO_HOST_KEY + "=" + URLEncoder.encode(host, "UTF-8");
         qs = qs + "&" + DUO_ORIGINAL_URL_KEY + "=" + URLEncoder.encode(originalURL, "UTF-8");
-        redirectUrl = this.loginUrl + "?" + qs;
+        redirectUrl = contextPath + loginUrl + "?" + qs;
         httpServletResponse.sendRedirect(redirectUrl);
       } else {
         log.warn("Could not redirect to Duo auth page.");
@@ -122,21 +123,21 @@ public class DuoAuthFilter implements javax.servlet.Filter {
     chain.doFilter(request, response);
   }
 
-  public void init(final FilterConfig filterConfig) {
-    this.ikey = filterConfig.getInitParameter("ikey");
-    this.skey = filterConfig.getInitParameter("skey");
-    this.akey = filterConfig.getInitParameter("akey");
-    this.host = filterConfig.getInitParameter("host");
+  @Override public void init(final FilterConfig filterConfig) {
+    ikey = filterConfig.getInitParameter("ikey");
+    skey = filterConfig.getInitParameter("skey");
+    akey = filterConfig.getInitParameter("akey");
+    host = filterConfig.getInitParameter("host");
 
     if (filterConfig.getInitParameter("login.url") != null) {
-      this.loginUrl = filterConfig.getInitParameter("login.url");
+      loginUrl = filterConfig.getInitParameter("login.url");
     }
     if (filterConfig.getInitParameter("unprotected.dirs") != null) {
-      this.unprotectedDirs = filterConfig.getInitParameter("unprotected.dirs").split(" ");
+      unprotectedDirs = filterConfig.getInitParameter("unprotected.dirs").split(" ");
     }
   }
 
-  public void destroy() {
-    filterConfig = null;
+  @Override public void destroy() {
+
   }
 }
