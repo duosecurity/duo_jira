@@ -5,6 +5,7 @@ import java.net.URLEncoder;
 import java.security.Principal;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +18,7 @@ public class DuoAuthFilter implements javax.servlet.Filter {
   private static final Category log = Category.getInstance(DuoAuthFilter.class);
 
   public static final String OS_AUTHSTATUS_KEY = "os_authstatus";
+  public static final String LOGIN_SUCCESS = "success";
 
   /** keys in a session where Duo attributes are stored. */
   public static final String DUO_REQUEST_KEY = "duo.request.key";
@@ -39,6 +41,7 @@ public class DuoAuthFilter implements javax.servlet.Filter {
       "/download/resources/com.duosecurity.jira.plugins.duo-twofactor:resources/",
       "/rest/gadget/1.0/login"
   };
+  private boolean isOAuthUnprotected = false;
 
   /**
    * Return true if url should not be protected by Duo auth, even if we have
@@ -77,7 +80,12 @@ public class DuoAuthFilter implements javax.servlet.Filter {
     String contextPath = ((HttpServletRequest) request).getContextPath();
 
     if (!isUnprotectedPage(httpServletRequest.getRequestURI().replaceFirst(contextPath, ""))) {
-      if (principal != null) {
+      if (request.getAttribute(OS_AUTHSTATUS_KEY) != null && isOAuthUnprotected) {
+        // Request has gone through OAuth, we're done if it succeeded
+        if (!request.getAttribute(OS_AUTHSTATUS_KEY).equals(LOGIN_SUCCESS)) {
+          throw new ServletException("OAuth authentication failed");
+        }
+      } else if (principal != null) {
         // User has logged in locally, has there been a Duo auth?
         if (session.getAttribute(DUO_AUTH_SUCCESS_KEY) == null) {
           // are we coming from the Duo auth servlet?
@@ -93,7 +101,8 @@ public class DuoAuthFilter implements javax.servlet.Filter {
             needAuth = true;
           }
         } // user has already authed with us this session
-      } // no user -> Seraph has not required auth -> we don't either
+      } // no user -> Seraph has not required auth -> we don't either,
+        // or user came from OAuth and we're configured to not require 2fa for that
     }     // we're serving a page for Duo auth
 
     if (needAuth) {
@@ -134,6 +143,10 @@ public class DuoAuthFilter implements javax.servlet.Filter {
     }
     if (filterConfig.getInitParameter("unprotected.dirs") != null) {
       unprotectedDirs = filterConfig.getInitParameter("unprotected.dirs").split(" ");
+    }
+
+    if (filterConfig.getInitParameter("unprotect.OAuth") != null) {
+      isOAuthUnprotected = Boolean.getBoolean(filterConfig.getInitParameter("unprotect.OAuth"));
     }
   }
 

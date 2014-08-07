@@ -46,8 +46,8 @@ if [ -e $JIRA/atlassian-jira/WEB-INF/lib/duo_java-1.0.jar ]; then
 fi
 
 # make sure we haven't already installed
-if [ -e $JIRA/atlassian-jira/WEB-INF/lib/duo-filter-1.3.1-SNAPSHOT.jar ]; then
-    echo "duo-filter-1.3.1-SNAPSHOT.jar already exists in $JIRA/atlassian-jira/WEB-INF/lib.  Move or remove this jar to continue."
+if [ -e $JIRA/atlassian-jira/WEB-INF/lib/duo-filter-1.3.2-SNAPSHOT.jar ]; then
+    echo "duo-filter-1.3.2-SNAPSHOT.jar already exists in $JIRA/atlassian-jira/WEB-INF/lib.  Move or remove this jar to continue."
     echo 'exiting'
     exit 1
 fi
@@ -69,9 +69,9 @@ if [ $? -ne 0 ]; then
 fi
 
 # install the seraph filter jar
-cp etc/duo-filter-1.3.1-SNAPSHOT.jar $JIRA/atlassian-jira/WEB-INF/lib
+cp etc/duo-filter-1.3.2-SNAPSHOT.jar $JIRA/atlassian-jira/WEB-INF/lib
 if [ $? -ne 0 ]; then
-    echo 'Could not copy duo-filter-1.3.1-SNAPSHOT.jar, please contact support@duosecurity.com'
+    echo 'Could not copy duo-filter-1.3.2-SNAPSHOT.jar, please contact support@duosecurity.com'
     echo 'exiting'
     exit 1
 fi
