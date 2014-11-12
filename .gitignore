@@ -1,3 +1,5 @@
 # IntelliJ
 .idea/
 *.iml
+*.DS_STORE
+*/target
