@@ -3,10 +3,10 @@
   <head>
     <title>Duo Authentication</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="decorator" content="atl.general"/>
   </head>
 
   <body style="text-align: center;">
-    <h1>Duo Authentication</h1>
 
      <div>
        <script type="text/javascript" src="$contextPath/download/resources/com.duosecurity.jira.plugins.duo-twofactor:resources/Duo-Web-v1.bundled.js"></script>
