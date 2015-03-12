@@ -4,6 +4,12 @@
 JIRA=/opt/atlassian/jira
 AKEY=`python -c "import hashlib, os;  print hashlib.sha1(os.urandom(32)).hexdigest()"`
 
+# duo file variables
+DUO_WEB_FILENAME=DuoWeb-1.1-SNAPSHOT.jar
+DUO_CLIENT_FILENAME=duo-client-0.2.1.jar
+DUO_FILTER_FILENAME=duo-filter-1.3.5-SNAPSHOT.jar
+DUO_PLUGIN_FILENAME=duo-twofactor-1.3.1-SNAPSHOT.jar
+
 usage () {
     printf >&2 "Usage: $0 [-d JIRA directory] -i ikey -s skey -h host\n"
     printf >&2 "ikey, skey, and host can be found in Duo account's administration panel at admin.duosecurity.com\n"
@@ -39,16 +45,23 @@ if [ ! -e $JIRA/atlassian-jira/WEB-INF/lib ]; then
 fi
 
 # make sure we haven't already installed
-if [ -e $JIRA/atlassian-jira/WEB-INF/lib/duo_java-1.0.jar ]; then
-    echo "duo_java-1.0.jar already exists in $JIRA/atlassian-jira/WEB-INF/lib.  Move or remove this jar to continue."
-    echo 'exiting'
+if [ -e "${JIRA}"/atlassian-jira/WEB-INF/lib/"${DUO_WEB_FILENAME}" ]; then
+    echo "${DUO_WEB_FILENAME} already exists in ${JIRA}/atlassian-jira/WEB-INF/lib.  Move or remove this jar to continue."
+    echo "exiting"
     exit 1
 fi
 
 # make sure we haven't already installed
-if [ -e $JIRA/atlassian-jira/WEB-INF/lib/duo-filter-1.3.2-SNAPSHOT.jar ]; then
-    echo "duo-filter-1.3.2-SNAPSHOT.jar already exists in $JIRA/atlassian-jira/WEB-INF/lib.  Move or remove this jar to continue."
-    echo 'exiting'
+if [ -e "${JIRA}"/atlassian-jira/WEB-INF/lib/"${DUO_CLIENT_FILENAME}" ]; then
+    echo "${DUO_CLIENT_FILENAME} already exists in ${JIRA}/atlassian-jira/WEB-INF/lib.  Move or remove this jar to continue."
+    echo "exiting"
+    exit 1
+fi
+
+# make sure we haven't already installed
+if [ -e "${JIRA}"/atlassian-jira/WEB-INF/lib/"${DUO_FILTER_FILENAME}" ]; then
+    echo "${DUO_FILTER_FILENAME} already exists in ${JIRA}/atlassian-jira/WEB-INF/lib.  Move or remove this jar to continue."
+    echo "exiting"
     exit 1
 fi
 
@@ -60,24 +73,32 @@ fi
 
 echo "Copying in Duo integration files..."
 
-# install the duo_java jar
-cp etc/duo_java-1.0.jar $JIRA/atlassian-jira/WEB-INF/lib
+# install the duo web jar
+cp etc/"${DUO_WEB_FILENAME}" $JIRA/atlassian-jira/WEB-INF/lib
 if [ $? -ne 0 ]; then
-    echo 'Could not copy duo_java-1.0.jar, please contact support@duosecurity.com'
-    echo 'exiting'
+    echo "Could not copy ${DUO_WEB_FILENAME}, please contact support@duosecurity.com"
+    echo "exiting"
+    exit 1
+fi
+
+# install the duo client jar
+cp etc/"${DUO_CLIENT_FILENAME}" $JIRA/atlassian-jira/WEB-INF/lib
+if [ $? -ne 0 ]; then
+    echo "Could not copy ${DUO_CLIENT_FILENAME}, please contact support@duosecurity.com"
+    echo "exiting"
     exit 1
 fi
 
 # install the seraph filter jar
-cp etc/duo-filter-1.3.2-SNAPSHOT.jar $JIRA/atlassian-jira/WEB-INF/lib
+cp etc/"${DUO_FILTER_FILENAME}" $JIRA/atlassian-jira/WEB-INF/lib
 if [ $? -ne 0 ]; then
-    echo 'Could not copy duo-filter-1.3.2-SNAPSHOT.jar, please contact support@duosecurity.com'
-    echo 'exiting'
+    echo "Could not copy ${DUO_FILTER_FILENAME}, please contact support@duosecurity.com"
+    echo "exiting"
     exit 1
 fi
 
 echo "duo_jira jars have been installed. Next steps, in order:"
-echo "- Upload and install the plugin in etc/duo-twofactor-1.3.1-SNAPSHOT.jar "
+echo "- Upload and install the plugin in etc/${DUO_PLUGIN_FILENAME} "
 echo "  using the JIRA web UI."
 echo "- Edit web.xml, located at $JIRA/atlassian-jira/WEB-INF/web.xml,"
 echo "  adding the following after the security filter and before any "
