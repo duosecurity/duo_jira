@@ -45,7 +45,7 @@ public class TwoFactorLoginServlet extends HttpServlet {
         StringEscapeUtils.escapeJavaScript(request.getParameter(DUO_REQUEST_KEY)));
     context.put("duoHost", StringEscapeUtils.escapeJavaScript(request.getParameter(DUO_HOST_KEY)));
     context.put("actionUrl", StringEscapeUtils.escapeJavaScript(request.getContextPath() + UriBuilder.fromUri(actionUrl)
-        .queryParam(DUO_ORIGINAL_URL_KEY, request.getContextPath() + actionArg)
+        .queryParam(DUO_ORIGINAL_URL_KEY, actionArg)
         .build()
         .toString()));
     context.put("contextPath", request.getContextPath());
