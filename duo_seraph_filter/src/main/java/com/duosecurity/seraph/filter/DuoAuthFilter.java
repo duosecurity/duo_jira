@@ -56,6 +56,10 @@ public class DuoAuthFilter implements javax.servlet.Filter {
   private boolean apiBypassEnabled = false;
   private boolean failOpen = false;
 
+  // vars to facilitate ip whitelisting.
+  private String ipregexp = "notanipaddress";
+  private String ip;
+
   /**
    * Return true if url should not be protected by Duo auth, even if we have
    * a local user.
@@ -203,6 +207,13 @@ public class DuoAuthFilter implements javax.servlet.Filter {
         // or user came from OAuth and we're configured to not require 2fa for that
     }     // we're serving a page for Duo auth
 
+    // compare the regex from the web.xml init param to see if we should bypass
+    // two factor auth.
+    ip = request.getRemoteAddr();
+    if (ip.matches(ipregexp)) {
+      needAuth = false;
+    }
+
     if (needAuth) {
       String result = preauthWithRetries(MAX_TRIES, principal);
 
@@ -225,6 +236,7 @@ public class DuoAuthFilter implements javax.servlet.Filter {
     skey = filterConfig.getInitParameter("skey");
     akey = filterConfig.getInitParameter("akey");
     host = filterConfig.getInitParameter("host");
+    ipregexp = filterConfig.getInitParameter("ipregexp");
 
     if (filterConfig.getInitParameter("login.url") != null) {
       loginUrl = filterConfig.getInitParameter("login.url");
