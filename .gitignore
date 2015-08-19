@@ -3,3 +3,5 @@
 *.iml
 *.DS_STORE
 */target
+/home
+/install

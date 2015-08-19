@@ -14,6 +14,9 @@ import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Category;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 public class TwoFactorLoginServlet extends HttpServlet {
   private static final Category log = Category.getInstance(TwoFactorLoginServlet.class);
 
@@ -58,7 +61,32 @@ public class TwoFactorLoginServlet extends HttpServlet {
     // Put the Duo response in the session.
     session.setAttribute(DUO_RESPONSE_ATTRIBUTE, request.getParameter(DUO_RESPONSE_ATTRIBUTE));
     // Send the user to the original destination.
-    response.sendRedirect(
-        UriBuilder.fromUri(request.getParameter(DUO_ORIGINAL_URL_KEY)).build().toString());
+
+    String safeURL = getSafeURL(request.getParameter(DUO_ORIGINAL_URL_KEY));
+
+    response.sendRedirect(safeURL); 
   }
+
+  private String getSafeURL(String originalurl) {
+        URI uri;
+
+        try {
+            uri = new URI(originalurl);
+
+            if (uri.isOpaque()) {        
+                return "/";
+            }
+            else if (uri.isAbsolute()) {
+                return uri.getPath().toString();
+            }
+            else {
+                return originalurl;
+            }
+        }
+        catch(URISyntaxException e) {
+            log.warn("URISyntaxException when handling Duo original redirect URL:" + originalurl);
+            log.warn(e.toString());
+            return "/";
+        }
+    }
 }

@@ -8,7 +8,7 @@ AKEY=`python -c "import hashlib, os;  print hashlib.sha1(os.urandom(32)).hexdige
 DUO_WEB_FILENAME=DuoWeb-1.1-SNAPSHOT.jar
 DUO_CLIENT_FILENAME=duo-client-0.2.1.jar
 DUO_FILTER_FILENAME=duo-filter-1.3.5-SNAPSHOT.jar
-DUO_PLUGIN_FILENAME=duo-twofactor-1.3.2-SNAPSHOT.jar
+DUO_PLUGIN_FILENAME=duo-twofactor-1.4.0-SNAPSHOT.jar
 
 usage () {
     printf >&2 "Usage: $0 [-d JIRA directory] -i ikey -s skey -h host\n"
