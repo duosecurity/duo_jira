@@ -5,9 +5,9 @@ JIRA=/opt/atlassian/jira
 AKEY=`python -c "import hashlib, os;  print hashlib.sha1(os.urandom(32)).hexdigest()"`
 
 # duo file variables
-DUO_WEB_FILENAME=DuoWeb-1.1-SNAPSHOT.jar
+DUO_WEB_FILENAME=DuoWeb-1.2-SNAPSHOT.jar
 DUO_CLIENT_FILENAME=duo-client-0.2.1.jar
-DUO_FILTER_FILENAME=duo-filter-1.3.5-SNAPSHOT.jar
+DUO_FILTER_FILENAME=duo-filter-1.3.6-SNAPSHOT.jar
 DUO_PLUGIN_FILENAME=duo-twofactor-1.4.0-SNAPSHOT.jar
 
 usage () {
