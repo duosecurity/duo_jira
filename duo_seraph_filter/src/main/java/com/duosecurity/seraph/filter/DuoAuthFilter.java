@@ -84,8 +84,17 @@ public class DuoAuthFilter implements javax.servlet.Filter {
   private Response sendPreauthRequest(String username) throws Exception {
     Http request = new Http("POST", host, "/auth/v2/preauth", 10);
     request.addParam("username", username);
+    request.addHeader("User-Agent", buildUserAgentHeader());
     request.signRequest(ikey, skey);
     return request.executeHttpRequest();
+  }
+
+  private String buildUserAgentHeader() {
+    String applicationInfo = DuoAuthFilter.class.getPackage().getImplementationTitle() + "/" + DuoAuthFilter.class.getPackage().getImplementationVersion();
+    String osInfo = "(" + System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch") + ")";
+    String javaInfo = System.getProperty("java.vendor") + "/" + System.getProperty("java.version");
+
+    return applicationInfo + " " + osInfo + " " + javaInfo;
   }
 
   private boolean shouldDuoAuthn(Principal principal)
