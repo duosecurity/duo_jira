@@ -12,11 +12,11 @@ DUO_PLUGIN_FILENAME=duo-twofactor-1.4.2.jar
 
 usage () {
     printf >&2 "Usage: $0 [-d JIRA directory] -i ikey -s skey -h host\n"
-    printf >&2 "ikey, skey, and host can be found in Duo account's administration panel at admin.duosecurity.com\n"
+    printf >&2 "Your Duo JIRA application's ikey, skey, and host can be found in your Duo account's Admin Panel at admin.duosecurity.com\n"
 }
 
 while getopts d:i:s:h: o
-do  
+do
     case "$o" in
         d)  JIRA="$OPTARG";;
         i)  IKEY="$OPTARG";;
@@ -33,7 +33,7 @@ if [ -z $HOST ]; then echo "Missing -h (Duo API hostname)"; usage; exit 1; fi
 
 echo "Installing Duo integration to $JIRA..."
 
-CONFLUENCE_ERROR="The directory ($JIRA) does not look like a JIRA installation. Use the -d option to specify where JIRA is installed."
+JIRA_ERROR="The directory ($JIRA) does not look like a JIRA installation. Use the -d option to specify where JIRA is installed."
 
 if [ ! -d $JIRA ]; then
     echo "$JIRA_ERROR"
@@ -44,36 +44,48 @@ if [ ! -e $JIRA/atlassian-jira/WEB-INF/lib ]; then
     exit 1
 fi
 
-# make sure we haven't already installed
-if [ -e "${JIRA}"/atlassian-jira/WEB-INF/lib/"${DUO_WEB_FILENAME}" ]; then
-    echo "${DUO_WEB_FILENAME} already exists in ${JIRA}/atlassian-jira/WEB-INF/lib.  Move or remove this jar to continue."
-    echo "exiting"
-    exit 1
+# check for existing plugin install
+if [ -e "${JIRA}"/atlassian-jira/WEB-INF/lib/DuoWeb-*.jar ]; then
+    echo "DuoWeb already exists in ${JIRA}/atlassian-jira/WEB-INF/lib."
+    UPGRADE_DUO=1
 fi
 
-# make sure we haven't already installed
-if [ -e "${JIRA}"/atlassian-jira/WEB-INF/lib/"${DUO_CLIENT_FILENAME}" ]; then
-    echo "${DUO_CLIENT_FILENAME} already exists in ${JIRA}/atlassian-jira/WEB-INF/lib.  Move or remove this jar to continue."
-    echo "exiting"
-    exit 1
+# check for existing plugin install
+if [ -e "${JIRA}"/atlassian-jira/WEB-INF/lib/duo-client-*.jar ]; then
+    echo "duo-client already exists in ${JIRA}/atlassian-jira/WEB-INF/lib."
+    UPGRADE_DUO=1
 fi
 
-# make sure we haven't already installed
-if [ -e "${JIRA}"/atlassian-jira/WEB-INF/lib/"${DUO_FILTER_FILENAME}" ]; then
-    echo "${DUO_FILTER_FILENAME} already exists in ${JIRA}/atlassian-jira/WEB-INF/lib.  Move or remove this jar to continue."
-    echo "exiting"
-    exit 1
+# check for existing plugin install
+if [ -e "${JIRA}"/atlassian-jira/WEB-INF/lib/duo-filter-*.jar ]; then
+    echo "duo-filter already exists in ${JIRA}/atlassian-jira/WEB-INF/lib."
+    UPGRADE_DUO=1
 fi
 
 # we don't actually write to web.xml, so just warn if it's already there
 grep '<filter-name>duoauth</filter-name>' $JIRA/atlassian-jira/WEB-INF/web.xml >/dev/null
 if [ $? -eq 0 ]; then
     echo "Warning: It looks like the Duo authenticator has already been added to JIRA's web.xml."
+    UPGRADE_DUO=1
 fi
 
-echo "Copying in Duo integration files..."
+# give them a chance to quit
+if [ "$UPGRADE_DUO" = "1" ]; then
+    echo "Continuing installation overwrites the current plugin version and uses the existing application information in web.xml."
+    while true; do
+        read -p "Continue installing Duo (y/n)?" choice
+        case "$choice" in
+          y|Y ) echo "Installing..."; break;;
+          n|N ) echo "Exiting installation; no changes made."; exit;;
+          * ) echo "Enter y for yes or n for no.";;
+        esac
+    done
+fi
+
+echo "Copying in Duo application files..."
 
 # install the duo web jar
+rm $JIRA/atlassian-jira/WEB-INF/lib/DuoWeb-*.jar
 cp etc/"${DUO_WEB_FILENAME}" $JIRA/atlassian-jira/WEB-INF/lib
 if [ $? -ne 0 ]; then
     echo "Could not copy ${DUO_WEB_FILENAME}, please contact support@duosecurity.com"
@@ -82,6 +94,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # install the duo client jar
+rm $JIRA/atlassian-jira/WEB-INF/lib/duo-filter-*.jar
 cp etc/"${DUO_CLIENT_FILENAME}" $JIRA/atlassian-jira/WEB-INF/lib
 if [ $? -ne 0 ]; then
     echo "Could not copy ${DUO_CLIENT_FILENAME}, please contact support@duosecurity.com"
@@ -90,6 +103,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # install the seraph filter jar
+rm $JIRA/atlassian-jira/WEB-INF/lib/duo-client-*.jar
 cp etc/"${DUO_FILTER_FILENAME}" $JIRA/atlassian-jira/WEB-INF/lib
 if [ $? -ne 0 ]; then
     echo "Could not copy ${DUO_FILTER_FILENAME}, please contact support@duosecurity.com"
@@ -97,9 +111,15 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+if [ "$UPGRADE_DUO" = "1" ]; then
 echo "duo_jira jars have been installed. Next steps, in order:"
 echo "- Upload and install the plugin in etc/${DUO_PLUGIN_FILENAME} "
-echo "  using the JIRA web UI."
+echo "  using the JIRA web UI. See https://duo.com/docs/jira."
+echo "- Restart JIRA."
+else
+echo "duo_jira jars have been installed. Next steps, in order:"
+echo "- Upload and install the plugin in etc/${DUO_PLUGIN_FILENAME} "
+echo "  using the JIRA web UI. See https://duo.com/docs/jira."
 echo "- Edit web.xml, located at $JIRA/atlassian-jira/WEB-INF/web.xml."
 echo "- Locate the filter:"
 echo "    <filter>"
@@ -141,4 +161,5 @@ echo "        <url-pattern>/*</url-pattern>"
 echo "        <dispatcher>FORWARD</dispatcher>"
 echo "        <dispatcher>REQUEST</dispatcher>"
 echo "    </filter-mapping>"
-echo "- Restart Jira."
+echo "- Restart JIRA."
+fi
