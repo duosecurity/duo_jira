@@ -94,7 +94,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # install the duo client jar
-rm $JIRA/atlassian-jira/WEB-INF/lib/duo-filter-*.jar
+rm $JIRA/atlassian-jira/WEB-INF/lib/duo-client-*.jar
 cp etc/"${DUO_CLIENT_FILENAME}" $JIRA/atlassian-jira/WEB-INF/lib
 if [ $? -ne 0 ]; then
     echo "Could not copy ${DUO_CLIENT_FILENAME}, please contact support@duosecurity.com"
@@ -103,7 +103,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # install the seraph filter jar
-rm $JIRA/atlassian-jira/WEB-INF/lib/duo-client-*.jar
+rm $JIRA/atlassian-jira/WEB-INF/lib/duo-filter-*.jar
 cp etc/"${DUO_FILTER_FILENAME}" $JIRA/atlassian-jira/WEB-INF/lib
 if [ $? -ne 0 ]; then
     echo "Could not copy ${DUO_FILTER_FILENAME}, please contact support@duosecurity.com"
