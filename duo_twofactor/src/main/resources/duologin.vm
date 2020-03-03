@@ -11,7 +11,7 @@
 
      <div>
        <script type="text/javascript" src="$contextPath/download/resources/com.duosecurity.jira.plugins.duo-twofactor:resources/Duo-Web-v2.js"></script>
-       <script>
+       <script type="text/javascript">
          Duo.init({
            'host': "$duoHost",
            'sig_request': "$sigRequest",
