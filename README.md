@@ -7,6 +7,9 @@
 
 **duo_jira** - Duo two-factor authentication for JIRA.
 
+Duo has released a new Atlassian plugin that will let you integrate Jira with the Duo Universal Prompt
+Check out https://duo.com/docs/jira-universal for more info on the Universal Prompt and [duo_universal_atlassian](https://github.com/duosecurity/duo_universal_atlassian) for the new plugin.
+
 # Usage
 
 Documentation: <https://www.duosecurity.com/docs/jira>
